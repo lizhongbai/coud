@@ -5,7 +5,7 @@
 //退出
 
 exports.showSignin = (req,res) =>{
-    res.send('lala')
+   res.render('signin.html')
 }
 
 //处理登陆界面
@@ -15,7 +15,7 @@ exports.handleSignin =(req,res) =>{
 
 //展示注册页面
 exports.showSignup = (req,res) =>{
-    res.send('shabi')
+    res.render('signup.html')
 }
 //处理注册逻辑
 exports.handleSignup = (req,res) =>{

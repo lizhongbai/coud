@@ -1,4 +1,5 @@
 
 exports.showIndex = (req,res) =>{
-    res.send('nihao')
+    // res.send('index.html')
+    res.render('index.html')
 }
