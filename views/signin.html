@@ -40,23 +40,28 @@
   <script src="/node_modules/jquery/dist/jquery.js"></script>
   <script>
     $('#signin_form').on('submit', handleSubmit)
+    // console.log(12)
 
     function handleSubmit (e) {
       e.preventDefault()
+      // console.log(123)
       var formData = $(this).serialize()
-      $.post('/signin', formData, function (data) {
+      // console.log(formData)
+      $.post('/signin',formData,function(data) {
+        console.log(data)
         switch(data.code) {
           case 200:
             window.location.href = '/'
             break
           case 1:
-            window.alert('用户名不存在')
+            window.alert('用户不存在')
             break
           case 2:
             window.alert('密码不正确')
             break
         }
       })
+     
     }
   </script>
 </body>

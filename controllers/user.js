@@ -14,7 +14,40 @@ exports.showSignin = (req,res) =>{
 
 //处理登陆界面
 exports.handleSignin =(req,res) =>{
-    send(123)
+    // 验证用户输入
+    //验证邮箱和密码正确
+    db.query(
+      'select * from `users` where `email`=?',
+      req.body.email,
+      (err,results) =>{
+        if(err) {
+          return req.send('内部出错')
+        }
+        //判断邮箱是否存在
+        if(results.length <=0) {
+          //
+          return req.json({
+            code:401,
+            msg:"邮箱不存在"
+          })
+        }
+        //判断密码对不对
+          const password = md5(req.body.password);
+          if (password !== results[0].password) {
+            return res.json({
+              code: 402,
+              msg: '密码错误'
+            });
+          }
+          // 如果用ajax请求的话，没办法使用res.redirect()
+          // 成功
+          res.json({
+            code: 200,
+            msg: '登录成功'
+          })
+      }
+    )
+    
     
 }
 
