@@ -18,4 +18,8 @@ app.use('/public',express.static('./public'))
 app.use('/node_modules',express.static('./node_modules'))
 //配置模板引擎
 app.engine('html', tmp);
+
+//配置bodyparser
+app.use(bodyparse.urlencoded({ extended: false }));
+
 app.use(router)
