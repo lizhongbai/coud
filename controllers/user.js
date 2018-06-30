@@ -33,8 +33,8 @@ exports.handleSignin =(req,res) =>{
       const password = md5(req.body.password);
       if(password ===user.password) {
         //记录dession保存的状态
-        // delete user.password
-        // req.session.user = user
+        delete user.password
+        req.session.user = user
 
         //是跳转 还是输出json？？
         res.json({
@@ -100,5 +100,10 @@ exports.handleSignup = (req,res) =>{
 }
 
 exports.handleSignout = (req,res)=>{
-    res.send('88')
+    // res.send('88')
+    //销毁session
+      // delete req.session.user
+      req.session.destroy() 
+    //跳转到登陆
+    res.redirect('/signin')
 }
