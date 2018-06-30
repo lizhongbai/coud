@@ -2,6 +2,7 @@
 
 
 const db = require('./db.helper')
+const userModel =require('../model/user')
 
 const md5 = require('md5')
 //展示登陆页面
@@ -16,37 +17,37 @@ exports.showSignin = (req,res) =>{
 exports.handleSignin =(req,res) =>{
     // 验证用户输入
     //验证邮箱和密码正确
-    db.query(
-      'select * from `users` where `email`=?',
-      req.body.email,
-      (err,results) =>{
-        if(err) {
-          return req.send('内部出错')
-        }
-        //判断邮箱是否存在
-        if(results.length <=0) {
-          //
-          return req.json({
-            code:401,
-            msg:"邮箱不存在"
-          })
-        }
-        //判断密码对不对
-          const password = md5(req.body.password);
-          if (password !== results[0].password) {
-            return res.json({
-              code: 402,
-              msg: '密码错误'
-            });
-          }
-          // 如果用ajax请求的话，没办法使用res.redirect()
-          // 成功
-          res.json({
-            code: 200,
-            msg: '登录成功'
-          })
+    userModel.getByEmail(req.body.email,(err,user) => {
+      if(err) {
+        return res.send('内部错了')
       }
-    )
+      // //判断user是否存在
+      if(!user) {
+        //不存在
+        return res.json({
+          code:401,
+          msg:"邮箱不存在"
+        })
+      }
+      //判断密码是否正确
+      const password = md5(req.body.password);
+      if(password ===user.password) {
+        //记录dession保存的状态
+        // delete user.password
+        // req.session.user = user
+
+        //是跳转 还是输出json？？
+        res.json({
+          code:200,
+          msg:'登陆成功'
+        })
+      }else{
+        res.json({
+          code:402,
+          msg:'密码错误'
+        })
+      }
+    })
     
     
 }
@@ -58,74 +59,44 @@ exports.showSignup = (req,res) =>{
 //处理注册逻辑
 exports.handleSignup = (req,res) =>{
     // res.send('234')
-    db.query(
-      'select * from `users` where `email`=?',
-      req.body.email,
-      (err,results) =>{
-        
-        if(err) {
-          
-          return res.send('内部错误')
-        }
-
-        if(results.length > 0) {
-          //数据表已经存在数据
-          res.render('signup.html',{
-            msg:'邮箱已经存在'
-          })
-          return
-        }
-        
-        //验证用户名
-        db.query(
-          'select * from `users` where `nickname`=?',
-          req.body.nickname,
-          (err,results) =>{
-            
-            if(err) {
-              
-              return res.send('内部错误')
-            }
-
-            if(results.length > 0 ) {
-              
-              //数据表已经存在
-              res.render('signup.html',{
-                msg:'昵称已经存在'
-              })
-              return
-            }
-
-            //  添加用户
-            req.body.createdAt = new Date()
-            req.body.password = md5(req.body.password)
-
-            db.query(
-              'insert into `users` set ?',
-              req.body,
-              (err,results) =>{
-                
-                if(err) {
-                  // console.log(err)
-                  return res.send('内部错了')
-                }
-
-                // console.log(results)
-                if(results.affectedRows === 1) {
-                  //成功
-                  res.redirect('/signin');
-                }else{
-                  //失败
-                  res.render('signup.html',{
-                    msg:'注册失败'
-                  })
-                }
-              }
-            )
-          }
-        )
+  //验证邮箱是否重复
+  userModel.getByEmail(req.body.email,(err,user) =>{
+    if(err) {
+      // console.log(err)
+      return res.send('cuole')
+    }
+    if(user) {
+      //邮箱已经存在
+      return res.render('signup.html',{
+        msg:'邮箱已经存在'
+      })
+    }
+    //验证昵称
+    userModel.getByNickname(req.body.nickname,(err,user) =>{
+      if(err) {
+        return res.send('错了')
       }
-    )   
+      if(user) {
+        //昵称已经存在
+        return res.render('signup.html',{
+          msg:'昵称已经存在'
+        })
+      }
+      //添加用户
+      req.body.createdAt = new Date()
+      req.body.password = md5(req.body.password)
+      
+      userModel.createUser(req.body,(err,isOk) =>{
+        if(isOk) {
+          res.redirect('./signin')
+        }else{
+          res.render('signup.html',{
+            msg:'注册失败'
+          })
+        }
+      })
+    })
+  })
 }
 
 exports.handleSignout = (req,res)=>{
