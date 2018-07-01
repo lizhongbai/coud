@@ -43,7 +43,7 @@ exports.showCreate = (req, res) => {
         }
     })
   };
-   
+   //产看话题详情
   exports.showTopic = (req, res) => {
 
     //`通过动态查询id
@@ -68,12 +68,86 @@ exports.showCreate = (req, res) => {
    })
 
   };
+  //显示修改页面
   exports.showEdit = (req, res) => {
-    res.send('showEdit');
+
+    categoryModel.getAll((err,categories) =>{
+        
+        const id = req.params.topicID
+
+        if(isNaN(id)) {
+            return res.send('参数错误')
+        }
+        
+        topicModel.getById(id,(err,topic) =>{
+            if(err) {
+                return res.send('内部错了')
+            }
+
+            if(topic) {
+                // console.log(topic)
+                res.render('topic/edit.html',{
+                    categories,
+                    topic,
+                    user:req.session.user
+                     
+                })
+            }else{
+                res.send('没有查询到数据')
+            }
+        })
+    })
+
+    // res.render('topic/edit.html')
   };
+  //处理修改页面
   exports.handleEdit = (req, res) => {
-    res.send('handleEdit');
+
+    const id = req.params.topicID
+
+    req.body.id = id
+
+    // console.log(req.body)
+
+    topicModel.update(req.body,(err,isOK) =>{
+        if(err) {
+            return res.json({
+                code:500,
+                msg:'内部错了'
+            })
+        }
+
+        if(isOK) {
+            res.json({
+                code:200,
+                msg:'修改成功'
+            })
+        }else{
+            res.json({
+                code:404,
+                msg:'修改失败'
+            })
+        }
+    })
+
+    // res.send('handleEdit');
   };
+
+  //处理话题删除
   exports.handleDelete = (req, res) => {
-    res.send('handleDelete');
+
+    const id = req.params.topicID
+
+    topicModel.delete(id,(err,isOK) =>{
+        
+        if(err) {
+            return res.send('内部错了')
+        }
+        if(isOK) {
+            res.redirect('/')
+        }else{
+            res.send('删除失败')
+        }
+    })
+    
   };
