@@ -45,7 +45,28 @@ exports.showCreate = (req, res) => {
   };
    
   exports.showTopic = (req, res) => {
-    res.send('showTopic');
+
+    //`通过动态查询id
+    const topicId = req.params.topicID 
+    //判断id 是不是一个数字
+   if(isNaN(topicId)) {
+       res.send('参数错误')
+   }
+
+   topicModel.getById(topicId,(err,topic) =>{
+       if(err) {
+           return res.send('服务器内部错了')
+       }
+       if(topic) {
+           res.render('topic/show.html',{
+               topic,
+               user:req.session.user
+           })
+       }else{
+           res.send('话题不存在')
+       }
+   })
+
   };
   exports.showEdit = (req, res) => {
     res.send('showEdit');
